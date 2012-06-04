@@ -41,4 +41,5 @@
     <string name="pause_button">Pause</string>
     <string name="next_button">Next</string>
     <string name="prev_button">Prev</string>
+    <string name="titleLabel">Title</string>
 </resources>

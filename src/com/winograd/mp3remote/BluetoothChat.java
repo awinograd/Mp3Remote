@@ -83,7 +83,9 @@ public class BluetoothChat extends Activity {
     private BluetoothChatService mChatService = null;
     
     SeekBar volumeSlider = null;
-    TextView trackTitle = null;
+    TextView trackTextView = null;
+    TextView artistTextView = null;
+    TextView albumTextView = null;
     
     Gson gson = null;
     
@@ -180,7 +182,9 @@ public class BluetoothChat extends Activity {
 			}
         });        
         
-        trackTitle = (TextView) findViewById(R.id.trackTitle);
+        trackTextView = (TextView) findViewById(R.id.trackTitle);
+        artistTextView = (TextView) findViewById(R.id.artistTextView);
+        albumTextView = (TextView) findViewById(R.id.albumTitle);
         
         gson = new Gson();
         
@@ -319,33 +323,42 @@ public class BluetoothChat extends Activity {
 	private void handleCommand(String commandJSON){
 		try{
 			CommandArgs cmd = gson.fromJson(commandJSON, CommandArgs.class);
+			
+			if (cmd.title != null){
+				trackTextView.setText(cmd.state + ": " + cmd.title);
+			}
+			if (cmd.artist != null){
+				artistTextView.setText(cmd.artist);
+			}
+			if (cmd.album != null){
+				albumTextView.setText(cmd.album);
+			}
 		
 			switch(Command.valueOf(cmd.command)){
 			case CONNECTED:
 				volumeSlider.setProgress(cmd.volume);
-				trackTitle.setText(cmd.state + ": " + cmd.title);
 				break;
 			case PLAY:
-				trackTitle.setText("Playing: " + cmd.title);
 				break;
 			case PAUSE:
-				trackTitle.setText("Paused: " + cmd.title);
 				break;
 			case NEXT_TRACK:
-				trackTitle.setText("Playing: " + cmd.title);
 				break;
 			case PREV_TRACK:
-				trackTitle.setText("Playing: " + cmd.title);
 				break;
 			case VOLUME:
 				break;
 			case SEEK:
 				break;
 			case MESSAGE:
-				 Toast.makeText(this, cmd.message, Toast.LENGTH_LONG * 2).show();
+				 //shown in catch all case
 			default:
 				Toast.makeText(this, "Unknown Error", Toast.LENGTH_SHORT).show();
 				break;
+			}
+			
+			if(cmd.message != null){
+				Toast.makeText(this, cmd.message, Toast.LENGTH_LONG).show();
 			}
 		}
 		catch(Exception e){
