@@ -49,6 +49,8 @@ public class BluetoothChat extends Activity {
     // Debugging
     private static final String TAG = "BluetoothChat";
     private static final boolean D = true;
+    
+    private static final char END_CMD_CHAR = '!';
 
     // Message types sent from the BluetoothChatService Handler
     public static final int MESSAGE_STATE_CHANGE = 1;
@@ -316,6 +318,7 @@ public class BluetoothChat extends Activity {
      * @param message  A string of text to send.
      */
     private void sendMessage(String message) {
+    	message += END_CMD_CHAR;
         // Check that we're actually connected before trying anything
         if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
             Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
