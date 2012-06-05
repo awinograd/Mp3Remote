@@ -82,7 +82,13 @@ public class BluetoothChat extends Activity {
     // Member object for the chat services
     private BluetoothChatService mChatService = null;
     
+    Button playButton = null;
+    Button pauseButton = null;
+    Button prevButton = null;
+    Button nextButton = null;
+    Button connectButton = null;
     SeekBar volumeSlider = null;
+    SeekBar seekSlider = null;
     TextView trackTextView = null;
     TextView artistTextView = null;
     TextView albumTextView = null;
@@ -116,28 +122,35 @@ public class BluetoothChat extends Activity {
             return;
         }
         
-        Button playButton = (Button) findViewById(R.id.playButton);
+        connectButton = (Button) findViewById(R.id.connectButton);
+        connectButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				scanForDevices();
+			}
+		});        
+        
+        playButton = (Button) findViewById(R.id.playButton);
         playButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				sendMessage(Command.PLAY.toString());
 			}
 		});
         
-        Button pauseButton = (Button) findViewById(R.id.pauseButton);
+        pauseButton = (Button) findViewById(R.id.pauseButton);
         pauseButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				sendMessage(Command.PAUSE.toString());
 			}
 		});
         
-        Button nextButton = (Button) findViewById(R.id.nextButton);
+        nextButton = (Button) findViewById(R.id.nextButton);
         nextButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				sendMessage(Command.NEXT_TRACK.toString());
 			}
 		});
         
-        Button prevButton = (Button) findViewById(R.id.prevButton);
+        prevButton = (Button) findViewById(R.id.prevButton);
         prevButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				sendMessage(Command.PREV_TRACK.toString());
@@ -163,7 +176,7 @@ public class BluetoothChat extends Activity {
 			}
         });
         
-        SeekBar seekSlider = (SeekBar) findViewById(R.id.seekSlider);
+        seekSlider = (SeekBar) findViewById(R.id.seekSlider);
         seekSlider.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
@@ -187,7 +200,20 @@ public class BluetoothChat extends Activity {
         albumTextView = (TextView) findViewById(R.id.albumTitle);
         
         gson = new Gson();
-        
+        updateInterfaceState();
+    }
+    
+    private void updateInterfaceState(){
+    	boolean enabled = mChatService != null && mChatService.getState() == BluetoothChatService.STATE_CONNECTED;
+    	int visibility = enabled ? View.VISIBLE : View.GONE;
+    	int connectButtonVisiblity = enabled ? View.GONE : View.VISIBLE;
+    	playButton.setVisibility(visibility);
+    	pauseButton.setVisibility(visibility);
+    	prevButton.setVisibility(visibility);
+    	nextButton.setVisibility(visibility);
+    	volumeSlider.setVisibility(visibility);
+    	seekSlider.setVisibility(visibility);
+    	connectButton.setVisibility(connectButtonVisiblity);
     }
 
     @Override
@@ -204,6 +230,7 @@ public class BluetoothChat extends Activity {
         } else {
             if (mChatService == null) setupChat();
         }
+        updateInterfaceState();
     }
 
     @Override
@@ -221,6 +248,7 @@ public class BluetoothChat extends Activity {
               mChatService.start();
             }
         }
+        updateInterfaceState();
     }
 
     private void setupChat() {
@@ -402,6 +430,7 @@ public class BluetoothChat extends Activity {
                     mTitle.setText(R.string.title_not_connected);
                     break;
                 }
+                updateInterfaceState();
                 break;
             case MESSAGE_WRITE:
                 byte[] writeBuf = (byte[]) msg.obj;
@@ -410,9 +439,8 @@ public class BluetoothChat extends Activity {
                 mConversationArrayAdapter.add("Me:  " + writeMessage);
                 break;
             case MESSAGE_READ:
-                byte[] readBuf = (byte[]) msg.obj;
                 // construct a string from the valid bytes in the buffer
-                String readMessage = new String(readBuf, 0, msg.arg1);
+                String readMessage = (String)msg.obj;
                 processReceivedMessage(readMessage);
                 break;
             case MESSAGE_DEVICE_NAME:
@@ -464,14 +492,18 @@ public class BluetoothChat extends Activity {
         inflater.inflate(R.menu.option_menu, menu);
         return true;
     }
+    
+    public void scanForDevices(){
+        // Launch the DeviceListActivity to see devices and do scan
+        Intent serverIntent = new Intent(this, DeviceListActivity.class);
+        startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.scan:
-            // Launch the DeviceListActivity to see devices and do scan
-            Intent serverIntent = new Intent(this, DeviceListActivity.class);
-            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+        	scanForDevices();
             return true;
         case R.id.discoverable:
             // Ensure this device is discoverable by others

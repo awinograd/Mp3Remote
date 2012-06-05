@@ -18,6 +18,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <Button
+        android:id="@+id/connectButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="5.23"
+        android:text="@string/connect_button" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
