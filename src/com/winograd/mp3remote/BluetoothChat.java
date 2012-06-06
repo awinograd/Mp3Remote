@@ -35,6 +35,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -67,33 +68,29 @@ public class BluetoothChat extends Activity {
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
 
-    // Layout Views
-    private TextView mTitle;
-    private ListView mConversationView;
-    private EditText mOutEditText;
-    private Button mSendButton;
-
     // Name of the connected device
     private String mConnectedDeviceName = null;
     // Array adapter for the conversation thread
     private ArrayAdapter<String> mConversationArrayAdapter;
-    // String buffer for outgoing messages
-    private StringBuffer mOutStringBuffer;
     // Local Bluetooth adapter
     private BluetoothAdapter mBluetoothAdapter = null;
     // Member object for the chat services
     private BluetoothChatService mChatService = null;
-    
-    Button playButton = null;
-    Button pauseButton = null;
-    Button prevButton = null;
-    Button nextButton = null;
-    Button connectButton = null;
-    SeekBar volumeSlider = null;
-    SeekBar seekSlider = null;
-    TextView trackTextView = null;
-    TextView artistTextView = null;
-    TextView albumTextView = null;
+
+    // Layout Views
+    private TextView mTitle;
+    private ListView mConversationView;    
+    private LinearLayout playerLayout = null;
+    private Button playButton = null;
+    private Button pauseButton = null;
+    private Button prevButton = null;
+    private Button nextButton = null;
+    private Button connectButton = null;
+    private SeekBar volumeSlider = null;
+    private SeekBar seekSlider = null;
+    private TextView trackTextView = null;
+    private TextView artistTextView = null;
+    private TextView albumTextView = null;
     
     Gson gson = null;
     
@@ -123,6 +120,8 @@ public class BluetoothChat extends Activity {
             finish();
             return;
         }
+        
+        playerLayout = (LinearLayout) findViewById(R.id.playerLayout);
         
         connectButton = (Button) findViewById(R.id.connectButton);
         connectButton.setOnClickListener(new OnClickListener() {
@@ -163,8 +162,9 @@ public class BluetoothChat extends Activity {
         volumeSlider.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
-				// TODO Auto-generated method stub
-				sendMessage(Command.VOLUME.toString() + "," + progress);
+				if (fromUser){
+					sendMessage(Command.VOLUME.toString() + "," + progress);
+				}
 			}
 
 			public void onStartTrackingTouch(SeekBar seekBar) {
@@ -182,8 +182,9 @@ public class BluetoothChat extends Activity {
         seekSlider.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
-				// TODO Auto-generated method stub
-				sendMessage(Command.SEEK.toString() + "," + progress);
+				if (fromUser){
+					sendMessage(Command.SEEK.toString() + "," + progress);
+				}
 			}
 
 			public void onStartTrackingTouch(SeekBar seekBar) {
@@ -207,15 +208,14 @@ public class BluetoothChat extends Activity {
     
     private void updateInterfaceState(){
     	boolean enabled = mChatService != null && mChatService.getState() == BluetoothChatService.STATE_CONNECTED;
-    	int visibility = enabled ? View.VISIBLE : View.GONE;
-    	int connectButtonVisiblity = enabled ? View.GONE : View.VISIBLE;
-    	playButton.setVisibility(visibility);
-    	pauseButton.setVisibility(visibility);
-    	prevButton.setVisibility(visibility);
-    	nextButton.setVisibility(visibility);
-    	volumeSlider.setVisibility(visibility);
-    	seekSlider.setVisibility(visibility);
-    	connectButton.setVisibility(connectButtonVisiblity);
+    	if (enabled){
+    		playerLayout.setVisibility(View.VISIBLE);
+    		connectButton.setVisibility(View.GONE);
+    	}
+    	else{
+    		playerLayout.setVisibility(View.GONE);
+    		connectButton.setVisibility(View.VISIBLE);
+    	}
     }
 
     @Override
@@ -261,26 +261,8 @@ public class BluetoothChat extends Activity {
         mConversationView = (ListView) findViewById(R.id.in);
         mConversationView.setAdapter(mConversationArrayAdapter);
 
-        // Initialize the compose field with a listener for the return key
-        mOutEditText = (EditText) findViewById(R.id.edit_text_out);
-        mOutEditText.setOnEditorActionListener(mWriteListener);
-
-        // Initialize the send button with a listener that for click events
-        mSendButton = (Button) findViewById(R.id.button_send);
-        mSendButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                // Send a message using content of the edit text widget
-                TextView view = (TextView) findViewById(R.id.edit_text_out);
-                String message = view.getText().toString();
-                sendMessage(message);
-            }
-        });
-
         // Initialize the BluetoothChatService to perform bluetooth connections
         mChatService = new BluetoothChatService(this, mHandler);
-
-        // Initialize the buffer for outgoing messages
-        mOutStringBuffer = new StringBuffer("");
     }
 
     @Override
@@ -330,10 +312,6 @@ public class BluetoothChat extends Activity {
             // Get the message bytes and tell the BluetoothChatService to write
             byte[] send = message.getBytes();
             mChatService.write(send);
-
-            // Reset out string buffer to zero and clear the edit text field
-            mOutStringBuffer.setLength(0);
-            mOutEditText.setText(mOutStringBuffer);
         }
     }
 
