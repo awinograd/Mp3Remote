@@ -342,7 +342,7 @@ public class BluetoothChat extends Activity {
 			if (cmd.album != null){
 				albumTextView.setText(cmd.album);
 			}
-		
+
 			switch(Command.valueOf(cmd.command)){
 			case CONNECTED:
 				volumeSlider.setProgress(cmd.volume);
@@ -358,6 +358,7 @@ public class BluetoothChat extends Activity {
 			case VOLUME:
 				break;
 			case SEEK:
+				seekSlider.setProgress(cmd.position);
 				break;
 			case MESSAGE:
 				 //shown in catch all case
