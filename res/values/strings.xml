@@ -43,4 +43,5 @@
     <string name="prev_button">Prev</string>
     <string name="titleLabel">Title</string>
     <string name="connect_button">Connect to Mp3Player</string>
+    <string name="debug_menu_option">Debug</string>
 </resources>

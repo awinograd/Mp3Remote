@@ -18,7 +18,7 @@ public final class R {
         public static final int artistTextView=0x7f06000f;
         public static final int button_scan=0x7f060006;
         public static final int connectButton=0x7f060007;
-        public static final int discoverable=0x7f060016;
+        public static final int debug=0x7f060016;
         public static final int in=0x7f060014;
         public static final int new_devices=0x7f060005;
         public static final int nextButton=0x7f06000c;
@@ -56,6 +56,7 @@ public final class R {
          */
         public static final int connect=0x7f04000e;
         public static final int connect_button=0x7f040015;
+        public static final int debug_menu_option=0x7f040016;
         public static final int discoverable=0x7f04000f;
         public static final int next_button=0x7f040012;
         public static final int none_found=0x7f04000a;

@@ -259,6 +259,7 @@ public class BluetoothChat extends Activity {
         // Initialize the array adapter for the conversation thread
         mConversationArrayAdapter = new ArrayAdapter<String>(this, R.layout.message);
         mConversationView = (ListView) findViewById(R.id.in);
+        mConversationView.setVisibility(View.GONE);
         mConversationView.setAdapter(mConversationArrayAdapter);
 
         // Initialize the BluetoothChatService to perform bluetooth connections
@@ -342,6 +343,9 @@ public class BluetoothChat extends Activity {
 			if (cmd.album != null){
 				albumTextView.setText(cmd.album);
 			}
+			if (cmd.position != -1){
+				seekSlider.setProgress(cmd.position);
+			}
 
 			switch(Command.valueOf(cmd.command)){
 			case CONNECTED:
@@ -358,7 +362,6 @@ public class BluetoothChat extends Activity {
 			case VOLUME:
 				break;
 			case SEEK:
-				seekSlider.setProgress(cmd.position);
 				break;
 			case MESSAGE:
 				 //shown in catch all case
@@ -487,9 +490,14 @@ public class BluetoothChat extends Activity {
         case R.id.scan:
         	scanForDevices();
             return true;
-        case R.id.discoverable:
+        case R.id.debug:
             // Ensure this device is discoverable by others
-            ensureDiscoverable();
+            if(mConversationView.getVisibility() == View.GONE){
+            	mConversationView.setVisibility(View.VISIBLE);
+            }
+            else{
+            	mConversationView.setVisibility(View.GONE);
+            }
             return true;
         }
         return false;
