@@ -16,6 +16,8 @@
 
 package com.winograd.mp3remote;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -32,12 +34,15 @@ import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.SimpleCursorAdapter;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -91,6 +96,10 @@ public class BluetoothChat extends Activity {
     private TextView trackTextView = null;
     private TextView artistTextView = null;
     private TextView albumTextView = null;
+    
+    private ArrayList<Song> songs = new ArrayList<Song>();
+    private ArrayAdapter<Song> mAdapter;
+    private ListView library;
     
     Gson gson = null;
     
@@ -201,6 +210,42 @@ public class BluetoothChat extends Activity {
         trackTextView = (TextView) findViewById(R.id.trackTitle);
         artistTextView = (TextView) findViewById(R.id.artistTextView);
         albumTextView = (TextView) findViewById(R.id.albumTitle);
+        
+        //String[] from = new String[] { ReviewsDB.KEY_TITLE, ReviewsDB.KEY_CATEGORY, ReviewsDB.KEY_RATING };
+		//int[] to = new int[] { R.id.nameText, R.id.categoryText, R.id.ratingBar };
+        Song s = new Song();
+        s.title = "Title";
+        s.album = "Album";
+        s.artist = "Artist";
+        songs.add(s);
+		ArrayList<String> data = new ArrayList<String>();
+		data.add("The Prolific Oven");
+		data.add("Fraiche Yogurt");
+		data.add("Patxis Pizza");
+		data.add("Jing Jing");
+		data.add("St. Michael's Alley");        
+        mAdapter = new ArrayAdapter<Song>(
+    			this,
+    			android.R.layout.simple_list_item_1,
+    			songs
+    	);
+        mAdapter.notifyDataSetChanged();
+		//mCursorAdapter = new SimpleCursorAdapter(this, R.layout.row3, cursor, from, to);
+        
+        
+        library = (ListView)findViewById(R.id.library);
+        library.setAdapter(mAdapter);
+
+        library.setOnItemClickListener(new OnItemClickListener(){
+			public void onItemClick(AdapterView<?> av, View view, int pos,
+					long arg3) {
+				ListView lv = (ListView)av;
+				Song s = (Song)lv.getAdapter().getItem(pos);
+				sendMessage("SONG,"+s.songNumber);
+			}
+        });
+        
+        
         
         gson = new Gson();
         updateInterfaceState();
@@ -365,7 +410,19 @@ public class BluetoothChat extends Activity {
 				break;
 			case MESSAGE:
 				 //shown in catch all case
+			case LIBRARY:
+				songs = cmd.songs;
+				mAdapter = new ArrayAdapter(
+						this,
+						android.R.layout.simple_list_item_1,
+						songs);
+				mAdapter.notifyDataSetChanged();
+				library.setAdapter(mAdapter);
+				mConversationArrayAdapter.add("numSongs : " + cmd.songs.size());
+				mConversationArrayAdapter.add("first : " + songs.get(0).title);
+				break;
 			default:
+				mConversationArrayAdapter.add("UErr: "+ cmd.command.toString());
 				Toast.makeText(this, "Unknown Error", Toast.LENGTH_SHORT).show();
 				break;
 			}

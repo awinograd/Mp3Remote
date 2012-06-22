@@ -130,10 +130,20 @@
         <ListView
             android:id="@+id/in"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="102dp"
             android:stackFromBottom="true"
             android:transcriptMode="alwaysScroll" >
         </ListView>
+
+        <ListView
+            android:id="@+id/library"
+            android:layout_width="wrap_content"
+            android:layout_height="204dp"
+            android:layout_gravity="fill" >
+            <!-- Preview: listitem=@android:layout/simple_list_item_1 -->
+
+        </ListView>
+
     </LinearLayout>
 
 </LinearLayout>

@@ -8,5 +8,6 @@ public enum Command {
 	PREV_TRACK,
 	VOLUME,
 	SEEK,
-	MESSAGE
+	MESSAGE,
+	LIBRARY
 }

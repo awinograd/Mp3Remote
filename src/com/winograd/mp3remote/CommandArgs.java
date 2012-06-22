@@ -1,5 +1,7 @@
 package com.winograd.mp3remote;
 
+import java.util.ArrayList;
+
 public class CommandArgs {
 	public String command;
 	public String state;
@@ -11,4 +13,5 @@ public class CommandArgs {
 	public String artist; 
 	public String album; 
 	public String message;
+	public ArrayList<Song> songs;
 }
